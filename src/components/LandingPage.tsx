@@ -8,8 +8,9 @@ const LandingPage = () => {
     <div className="min-h-screen bg-gradient-to-b from-[#5D0F1D] to-[#8B1728]">
       {/* Navbar */}
       <nav className="bg-[#5D0F1D] px-6 py-4 flex justify-between items-center shadow-lg">
-        <div className="flex items-center">
+        <div className="flex flex-col">
           <h1 className="text-white text-2xl font-bold">SMARTBODEGA</h1>
+          <p className="text-sm text-gray-300">Todo lo que necesitas, al instante.</p>
         </div>
         <button
           onClick={() => navigate('/login')}

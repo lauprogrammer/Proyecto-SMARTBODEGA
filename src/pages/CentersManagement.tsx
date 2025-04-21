@@ -19,7 +19,7 @@ const CentersManagement = () => {
         address: 'Calle 123 #45-67',
         phone: '123-456-7890',
         email: 'centro.principal@example.com',
-        manager: 'Juan Pérez',
+        manager: 'Laura Ortiz',
         created: '2024-01-15',
         lastUpdate: '2024-04-18'
       }
@@ -34,7 +34,7 @@ const CentersManagement = () => {
         address: 'Avenida 789 #12-34',
         phone: '098-765-4321',
         email: 'centro.norte@example.com',
-        manager: 'María González',
+        manager: 'Daniela Salgado',
         created: '2024-02-20',
         lastUpdate: '2024-04-17'
       }
@@ -49,7 +49,7 @@ const CentersManagement = () => {
         address: 'Carrera 456 #78-90',
         phone: '555-123-4567',
         email: 'centro.sur@example.com',
-        manager: 'Carlos Rodríguez',
+        manager: 'Andres Peña',
         created: '2024-03-10',
         lastUpdate: '2024-04-16'
       }

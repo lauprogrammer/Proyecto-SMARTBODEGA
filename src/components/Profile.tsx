@@ -188,8 +188,8 @@ const Profile = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
                     onChange={(e) => setFormData({ ...formData, sede: e.target.value })}
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
                   >
-                    <option value="Sede Norte">Sede Norte</option>
-                    <option value="Sede Sur">Sede Sur</option>
+                    <option value="Sede Norte">Sede 1</option>
+                    <option value="Sede Sur">Sede 2</option>
                   </select>
                 ) : (
                   <div className="flex items-center space-x-2 text-gray-700">

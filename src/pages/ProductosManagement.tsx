@@ -15,6 +15,19 @@ const ProductosManagement = () => {
   const [selectedProducto, setSelectedProducto] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [formData, setFormData] = useState({
+    nombre: '',
+    categoria: '',
+    stock: '',
+    precio: '',
+    estado: 'Activo',
+    proveedor: '',
+    detalles: {
+      descripcion: '',
+      fechaIngreso: '',
+      ubicacion: ''
+    }
+  });
 
   // Datos de ejemplo
   const productos = [
@@ -77,6 +90,45 @@ const ProductosManagement = () => {
   const handleDeleteProducto = (producto: any) => {
     setSelectedProducto(producto);
     setShowDeleteConfirm(true);
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (name.startsWith('detalles.')) {
+      const detailName = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        detalles: {
+          ...prev.detalles,
+          [detailName]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Aquí iría la lógica para guardar el nuevo producto
+    console.log('Nuevo producto:', formData);
+    setShowModal(false);
+    setFormData({
+      nombre: '',
+      categoria: '',
+      stock: '',
+      precio: '',
+      estado: 'Activo',
+      proveedor: '',
+      detalles: {
+        descripcion: '',
+        fechaIngreso: '',
+        ubicacion: ''
+      }
+    });
   };
 
   return (
@@ -263,6 +315,151 @@ const ProductosManagement = () => {
           ))}
         </div>
       </div>
+
+      {/* Modal de Nuevo Producto */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-[#5D0F1D]">Nuevo Producto</h2>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="relative">
+                  <Package className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleFormChange}
+                    placeholder="Nombre del Producto"
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5D0F1D] focus:border-[#5D0F1D] transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <Boxes className="absolute left-3 top-3 text-gray-400" />
+                  <select
+                    name="categoria"
+                    value={formData.categoria}
+                    onChange={handleFormChange}
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5D0F1D] focus:border-[#5D0F1D] transition-all duration-200"
+                    required
+                  >
+                    <option value="">Seleccione una categoría</option>
+                    <option value="Electrónicos">Electrónicos</option>
+                    <option value="Herramientas">Herramientas</option>
+                    <option value="Materiales">Materiales</option>
+                    <option value="Mobiliario">Mobiliario</option>
+                  </select>
+                </div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    name="stock"
+                    value={formData.stock}
+                    onChange={handleFormChange}
+                    placeholder="Stock"
+                    className="w-full pl-4 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5D0F1D] focus:border-[#5D0F1D] transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="number"
+                    name="precio"
+                    value={formData.precio}
+                    onChange={handleFormChange}
+                    placeholder="Precio"
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5D0F1D] focus:border-[#5D0F1D] transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    name="proveedor"
+                    value={formData.proveedor}
+                    onChange={handleFormChange}
+                    placeholder="Proveedor"
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5D0F1D] focus:border-[#5D0F1D] transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <Map className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="text"
+                    name="detalles.ubicacion"
+                    value={formData.detalles.ubicacion}
+                    onChange={handleFormChange}
+                    placeholder="Ubicación"
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5D0F1D] focus:border-[#5D0F1D] transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div className="relative md:col-span-2">
+                  <textarea
+                    name="detalles.descripcion"
+                    value={formData.detalles.descripcion}
+                    onChange={handleFormChange}
+                    placeholder="Descripción del producto"
+                    className="w-full pl-4 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5D0F1D] focus:border-[#5D0F1D] transition-all duration-200"
+                    rows={3}
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-3 text-gray-400" />
+                  <input
+                    type="date"
+                    name="detalles.fechaIngreso"
+                    value={formData.detalles.fechaIngreso}
+                    onChange={handleFormChange}
+                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5D0F1D] focus:border-[#5D0F1D] transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <select
+                    name="estado"
+                    value={formData.estado}
+                    onChange={handleFormChange}
+                    className="w-full pl-4 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5D0F1D] focus:border-[#5D0F1D] transition-all duration-200"
+                    required
+                  >
+                    <option value="Activo">Activo</option>
+                    <option value="Inactivo">Inactivo</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#5D0F1D] text-white rounded-lg hover:bg-[#7A1E2E]"
+                >
+                  Crear Producto
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

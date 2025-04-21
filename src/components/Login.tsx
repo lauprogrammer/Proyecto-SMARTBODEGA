@@ -14,15 +14,11 @@ const Login = () => {
     navigate('/dashboard');
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
-  };
-
-  const handleDirectAccess = () => {
-    navigate('/dashboard');
   };
 
   return (
@@ -78,15 +74,19 @@ const Login = () => {
           </div>
           
           <div>
-            <input
-              type="text"
+            <select
               name="rol"
-              placeholder="Rol"
               value={formData.rol}
               onChange={handleChange}
               className="w-full px-4 py-2 rounded bg-white bg-opacity-90 border border-gray-300 focus:outline-none focus:border-blue-500"
               required
-            />
+            >
+              <option value="">Seleccione un rol</option>
+              <option value="administrador">Administrador</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="operador">Operador</option>
+              <option value="invitado">Invitado</option>
+            </select>
           </div>
           
           <button
@@ -96,16 +96,6 @@ const Login = () => {
             Login
           </button>
         </form>
-
-        {/* Botón de acceso directo */}
-        <div className="mt-4 text-center">
-          <button
-            onClick={handleDirectAccess}
-            className="text-white hover:text-gray-300 text-sm underline transition duration-200"
-          >
-            Acceder directamente al Dashboard
-          </button>
-        </div>
       </div>
     </div>
   );

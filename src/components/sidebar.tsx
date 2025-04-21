@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, LogOut, Users, Building2, Landmark, LayoutGrid, MapPin, User, Package, Boxes, ClipboardList, Truck, Warehouse, UserPlus, UserCog, UserCheck, Settings, Key, FileText, BarChart2 } from "lucide-react";
+import { ChevronDown, ChevronUp, LogOut, Users, Building2, Landmark, LayoutGrid, MapPin, User, Package, Boxes, ClipboardList, Truck, Warehouse, UserCog, UserCheck, Settings, Key, FileText, BarChart2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import Profile from "./Profile";
@@ -48,11 +48,6 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
           path: '/users',
           icon: <Users className="w-5 h-5" />,
           subItems: [
-            {
-              title: 'Nuevo Usuario',
-              path: '/create-user',
-              icon: <UserPlus className="w-5 h-5" />
-            },
             {
               title: 'Gestionar Usuarios',
               path: '/manage-users',
