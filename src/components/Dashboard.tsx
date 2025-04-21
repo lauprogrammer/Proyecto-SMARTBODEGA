@@ -8,7 +8,7 @@ const Dashboard = () => {
           {/* Contenedor de la imagen con gradiente */}
           <div className="relative">
             <img
-              src="/img/Dash.jpg"
+              src="/src/img/Dash.jpg"
               alt="Dashboard"
               className="w-full object-cover h-[70vh]"
             />

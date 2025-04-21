@@ -27,7 +27,7 @@ const Login = () => {
       <div 
         className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
         style={{ 
-          backgroundImage: 'url("/img/imagen sena.jpg")',
+          backgroundImage: 'url("/src/img/imagen sena.jpg")',
           filter: 'brightness(0.9)'
         }}
       />
@@ -40,7 +40,7 @@ const Login = () => {
         {/* Logo SENA */}
         <div className="flex justify-center mb-8">
           <img 
-            src="/img/logo SENA.png" 
+            src="/src/img/logo SENA.png" 
             alt="SENA Logo" 
             className="w-32 h-auto filter brightness-0 invert transform transition-all duration-500 hover:scale-105"
           />

@@ -32,7 +32,7 @@ const LandingPage = () => {
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
             <img
-              src="/img/Tecnologia e innovación.webp"
+              src="/src/img/Tecnologia e innovación.webp"
               alt="Tecnología e Innovación"
               className="rounded-lg shadow-xl w-full max-w-sm mx-auto transform transition-all duration-700 hover:scale-105 animate-[fadeIn_1s_ease-in] motion-safe:animate-[fadeInUp_1s_ease-out]" //Manejo de animaciones de la imagen
             />
