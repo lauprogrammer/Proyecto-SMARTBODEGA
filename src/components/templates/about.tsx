@@ -1,4 +1,4 @@
-import { title } from "@/components/primitives";
+import { title } from "@/components/atoms/primitives";
 import DefaultLayout from "@/layouts/default";
 
 export default function DocsPage() {

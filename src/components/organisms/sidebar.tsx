@@ -1,8 +1,8 @@
 import { ChevronDown, ChevronUp, LogOut, Users, Building2, Landmark, LayoutGrid, MapPin, User, Package, Boxes, ClipboardList, Truck, Warehouse, UserCog, UserCheck, Settings, Key, FileText, BarChart2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import Profile from "./Profile";
-import SettingsModal from "./Settings";
+import Profile from "./templates/Profile";
+import SettingsModal from "./templates/Settings";
 
 const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: () => void }) => {
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});

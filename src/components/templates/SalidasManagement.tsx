@@ -4,7 +4,7 @@ import {
   User, Tag, DollarSign, X, ChevronDown, ChevronUp,
   ArrowRight, AlertCircle
 } from 'lucide-react';
-import { exitService } from '@/services/exitService';
+import { exitService } from '@/api/exitService';
 import { Exit, ExitFormData } from '@/types/exit';
 import { toast } from 'react-hot-toast';
 

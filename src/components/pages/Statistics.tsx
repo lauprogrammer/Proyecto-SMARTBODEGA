@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { Users, Package, ArrowDownToLine, ArrowUpFromLine, BarChart2, Download, Filter, Calendar, TrendingUp, TrendingDown, AlertCircle, CheckCircle } from 'lucide-react';
-import { entryService } from '@/services/entryService';
-import { exitService } from '@/services/exitService';
-import { categoryService } from '@/services/categoryService';
+import { entryService } from '@/api/entryService';
+import { exitService } from '@/api/exitService';
+import { categoryService } from '@/api/categoryService';
 
 interface RoleData {
   name: string;

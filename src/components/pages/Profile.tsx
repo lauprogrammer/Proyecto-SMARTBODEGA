@@ -6,8 +6,8 @@ const Profile = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
-    nombre: 'Juan Pérez',
-    email: 'juan@example.com',
+    nombre: 'Laura Ortiz',
+    email: 'isa@example.com',
     telefono: '1234567890',
     rol: 'Administrador',
     centro: 'Centro Principal',

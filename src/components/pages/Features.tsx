@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Boxes, Plus, Search, Filter, ChevronDown, ChevronUp, Edit, Trash2, X, Check } from 'lucide-react';
-import { categoryService } from '@/services/categoryService';
+import { categoryService } from '@/api/categoryService';
 import { Category, CategoryFormData } from '@/types/category';
 import { toast } from 'react-hot-toast';
 

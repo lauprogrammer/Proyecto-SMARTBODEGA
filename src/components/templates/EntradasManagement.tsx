@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ClipboardList, Plus, Search, Filter, ChevronDown, ChevronUp, Edit, Trash2, X } from 'lucide-react';
-import { entryService } from '@/services/entryService';
+import { entryService } from '@/api/entryService';
 import { Entry, EntryFormData } from '@/types/entry';
 import { toast } from 'react-hot-toast';
 
