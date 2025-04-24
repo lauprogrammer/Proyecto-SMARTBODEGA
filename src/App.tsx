@@ -20,7 +20,7 @@ import Reports from './components/pages/Reports';
 import Statistics from './components/pages/Statistics';
 import Features from './components/pages/Features';
 import Navbar from './components/organisms/navbar';
-import Sidebar from './components/sidebar';
+import Sidebar from './components/organisms/sidebar';
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

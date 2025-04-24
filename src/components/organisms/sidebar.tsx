@@ -1,9 +1,7 @@
 import { ChevronDown, ChevronUp, LogOut, Users, Building2, Landmark, LayoutGrid, MapPin, User, Package, Boxes, ClipboardList, Truck, Warehouse, UserCog, UserCheck, Settings, Key, FileText, BarChart2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import Profile from "./templates/Profile";
-import SettingsModal from "./templates/Settings";
-
+import Profile from "../pages/Profile";
 const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: () => void }) => {
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -268,7 +266,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
 
       {/* Modals */}
       <Profile isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
-      <SettingsModal isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} />
+      {/* <Settings isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} /> */}
     </>
   );
 };
