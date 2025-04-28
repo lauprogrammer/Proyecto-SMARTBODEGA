@@ -195,7 +195,11 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
                   toggleMenu(menu.title);
                 }
               }}
-              className="w-full text-left flex justify-between items-center bg-[#7A1E2E] hover:bg-[#8B2438] px-4 py-2.5 rounded-lg transition-colors duration-200"
+              className={`w-full text-left flex justify-between items-center px-4 py-2.5 rounded-lg transition-colors duration-200
+                ${menu.path && location.pathname === menu.path
+                  ? "bg-[#CAB58A] text-black"
+                  : "bg-[#7A1E2E] hover:bg-[#8B2438] text-white"}
+              `}
             >
               <div className="flex items-center space-x-2">
                 {menu.icon}
@@ -219,7 +223,11 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
                           handleNavigation(submenu.path);
                         }
                       }}
-                      className="w-full flex items-center justify-between space-x-2 px-4 py-2 text-gray-200 hover:text-white hover:bg-[#7A1E2E] rounded-lg transition-colors duration-200"
+                      className={`w-full flex items-center justify-between space-x-2 px-4 py-2 rounded-lg transition-colors duration-200
+                        ${submenu.path && location.pathname === submenu.path
+                          ? "bg-[#CAB58A] text-black"
+                          : "text-gray-200 hover:text-white hover:bg-[#7A1E2E]"}
+                      `}
                     >
                       <div className="flex items-center space-x-2">
                         {submenu.icon}
@@ -237,7 +245,11 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
                           <button
                             key={subsubmenu.title}
                             onClick={() => subsubmenu.path && handleNavigation(subsubmenu.path)}
-                            className="w-full flex items-center space-x-2 px-4 py-2 text-gray-200 hover:text-white hover:bg-[#7A1E2E] rounded-lg transition-colors duration-200"
+                            className={`w-full flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200
+                              ${subsubmenu.path && location.pathname === subsubmenu.path
+                                ? "bg-[#CAB58A] text-black"
+                                : "text-gray-200 hover:text-white hover:bg-[#7A1E2E]"}
+                            `}
                           >
                             {subsubmenu.icon}
                             <span>{subsubmenu.title}</span>
