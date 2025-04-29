@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
-import { Shield, UserCog, Check, X, Plus, Trash2, Edit, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield, Check, X, Plus, Trash2, Edit, ChevronDown, ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+// Esquema de validación con zod
+const RoleSchema = z.object({
+  name: z.string().min(1, 'El nombre del rol es requerido'),
+  description: z.string().min(1, 'La descripción es requerida'),
+  permissions: z.array(z.string()).min(1, 'Debes seleccionar al menos un permiso')
+});
+
+type RoleFormValues = z.infer<typeof RoleSchema>;
 
 const RolesAndPermissions = () => {
   const navigate = useNavigate();
@@ -8,7 +20,6 @@ const RolesAndPermissions = () => {
   const [selectedRole, setSelectedRole] = useState<any>(null);
   const [expandedRole, setExpandedRole] = useState<number | null>(null);
 
-  // Datos de ejemplo para roles y permisos
   const roles = [
     {
       id: 1,
@@ -45,6 +56,30 @@ const RolesAndPermissions = () => {
     }
   ];
 
+  const allPermissions = [
+    'Gestionar usuarios',
+    'Gestionar roles',
+    'Gestionar centros',
+    'Gestionar sedes',
+    'Gestionar inventario',
+    'Gestionar entradas/salidas',
+    'Ver inventario',
+    'Solicitar productos',
+    'Ver reportes',
+    'Ver reportes básicos'
+  ];
+
+  const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<RoleFormValues>({
+    resolver: zodResolver(RoleSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      permissions: []
+    }
+  });
+
+  const watchedPermissions = watch('permissions');
+
   const handleRoleClick = (roleId: number) => {
     setExpandedRole(expandedRole === roleId ? null : roleId);
   };
@@ -52,11 +87,32 @@ const RolesAndPermissions = () => {
   const handleEditRole = (role: any) => {
     setSelectedRole(role);
     setShowModal(true);
+
+    reset({
+      name: role.name,
+      description: role.description,
+      permissions: role.permissions
+    });
   };
 
   const handleDeleteRole = (role: any) => {
-    // Aquí iría la lógica para eliminar el rol
     console.log(`Eliminando rol: ${role.name}`);
+  };
+
+  const onSubmit = (data: RoleFormValues) => {
+    console.log('Datos del formulario:', data);
+    setShowModal(false);
+    setSelectedRole(null);
+    reset();
+  };
+
+  const handleCheckboxChange = (permission: string) => {
+    const currentPermissions = watch('permissions');
+    if (currentPermissions.includes(permission)) {
+      setValue('permissions', currentPermissions.filter(p => p !== permission));
+    } else {
+      setValue('permissions', [...currentPermissions, permission]);
+    }
   };
 
   return (
@@ -69,7 +125,11 @@ const RolesAndPermissions = () => {
               <h1 className="text-2xl font-bold text-[#5D0F1D]">Roles y Permisos</h1>
               <button 
                 className="flex items-center space-x-2 bg-[#5D0F1D] text-white px-4 py-2 rounded-lg hover:bg-[#7A1E2E] transition-colors duration-200"
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setShowModal(true);
+                  reset();
+                  setSelectedRole(null);
+                }}
               >
                 <Plus className="w-5 h-5" />
                 <span>Nuevo Rol</span>
@@ -122,7 +182,6 @@ const RolesAndPermissions = () => {
                 </div>
               </div>
 
-              {/* Permisos Expandidos */}
               {expandedRole === role.id && (
                 <div className="bg-gray-50 p-4 animate-fadeIn">
                   <h4 className="font-medium text-gray-700 mb-3">Permisos</h4>
@@ -141,7 +200,7 @@ const RolesAndPermissions = () => {
         </div>
       </div>
 
-      {/* Modal de Crear/Editar Rol */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -159,52 +218,59 @@ const RolesAndPermissions = () => {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <form className="space-y-4">
+
+            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nombre del Rol</label>
                 <input
-                  type="text"
-                  defaultValue={selectedRole?.name}
+                  {...register('name')}
                   className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
                   placeholder="Ej: Administrador"
                 />
+                {errors.name && (
+                  <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Descripción</label>
                 <textarea
-                  defaultValue={selectedRole?.description}
+                  {...register('description')}
                   className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
                   rows={3}
                   placeholder="Describe las funciones y responsabilidades de este rol"
                 />
+                {errors.description && (
+                  <p className="text-sm text-red-500 mt-1">{errors.description.message}</p>
+                )}
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Permisos</label>
                 <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="manageUsers" className="rounded text-[#5D0F1D] focus:ring-[#5D0F1D]" />
-                    <label htmlFor="manageUsers">Gestionar usuarios</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="manageRoles" className="rounded text-[#5D0F1D] focus:ring-[#5D0F1D]" />
-                    <label htmlFor="manageRoles">Gestionar roles</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="manageInventory" className="rounded text-[#5D0F1D] focus:ring-[#5D0F1D]" />
-                    <label htmlFor="manageInventory">Gestionar inventario</label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="viewReports" className="rounded text-[#5D0F1D] focus:ring-[#5D0F1D]" />
-                    <label htmlFor="viewReports">Ver reportes</label>
-                  </div>
+                  {allPermissions.map((permission) => (
+                    <div key={permission} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={watchedPermissions.includes(permission)}
+                        onChange={() => handleCheckboxChange(permission)}
+                        className="rounded text-[#5D0F1D] focus:ring-[#5D0F1D]"
+                      />
+                      <label>{permission}</label>
+                    </div>
+                  ))}
                 </div>
+                {errors.permissions && (
+                  <p className="text-sm text-red-500 mt-1">{errors.permissions.message}</p>
+                )}
               </div>
+
               <div className="flex justify-end space-x-4 mt-6">
                 <button
                   type="button"
                   onClick={() => {
                     setShowModal(false);
                     setSelectedRole(null);
+                    reset();
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
@@ -225,4 +291,4 @@ const RolesAndPermissions = () => {
   );
 };
 
-export default RolesAndPermissions; 
+export default RolesAndPermissions;
