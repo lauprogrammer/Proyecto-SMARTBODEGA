@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
 import { LayoutGrid, Search, Plus, Edit, Trash2, X } from 'lucide-react';
+import { z } from 'zod';
 
 const AreasManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedArea, setSelectedArea] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    status: 'Activo',
+    capacity: 0,
+    manager: '',
+    location: ''
+  });
+  const [formErrors, setFormErrors] = useState<any>({});
 
   // Datos de ejemplo para áreas
   const areas = [
@@ -32,8 +42,26 @@ const AreasManagement = () => {
     }
   ];
 
+  // Zod schema para la validación
+  const areaSchema = z.object({
+    name: z.string().min(1, { message: "El nombre es obligatorio" }),
+    description: z.string().min(1, { message: "La descripción es obligatoria" }),
+    status: z.enum(['Activo', 'Inactivo']),
+    capacity: z.number().min(1, { message: "La capacidad debe ser mayor que 0" }),
+    manager: z.string().min(1, { message: "El nombre del gerente es obligatorio" }),
+    location: z.string().min(1, { message: "La ubicación es obligatoria" })
+  });
+
   const handleEditArea = (area: any) => {
     setSelectedArea(area);
+    setFormData({
+      name: area.name,
+      description: area.description,
+      status: area.status,
+      capacity: area.details.capacity,
+      manager: area.details.manager,
+      location: area.details.location
+    });
     setShowModal(true);
   };
 
@@ -46,6 +74,25 @@ const AreasManagement = () => {
     area.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     area.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      areaSchema.parse(formData); // Valida los datos con Zod
+      // Aquí iría la lógica para crear/actualizar el área
+      console.log("Datos válidos:", formData);
+      setShowModal(false); // Cerrar el modal después de la validación
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: any = {};
+        error.errors.forEach(err => {
+          errors[err.path[0]] = err.message;
+        });
+        setFormErrors(errors);
+      }
+    }
+  };
 
   return (
     <div className="bg-gray-50">
@@ -152,30 +199,35 @@ const AreasManagement = () => {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <form className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Nombre</label>
                 <input
                   type="text"
-                  defaultValue={selectedArea?.name}
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
                   placeholder="Ej: Área de Administración"
                 />
+                {formErrors.name && <span className="text-red-500 text-sm">{formErrors.name}</span>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Descripción</label>
                 <textarea
-                  defaultValue={selectedArea?.description}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
                   rows={3}
                   placeholder="Describe el propósito y función del área"
                 />
+                {formErrors.description && <span className="text-red-500 text-sm">{formErrors.description}</span>}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Estado</label>
                   <select
-                    defaultValue={selectedArea?.status}
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
                   >
                     <option value="Activo">Activo</option>
@@ -186,10 +238,12 @@ const AreasManagement = () => {
                   <label className="block text-sm font-medium text-gray-700">Capacidad</label>
                   <input
                     type="number"
-                    defaultValue={selectedArea?.details?.capacity}
+                    value={formData.capacity}
+                    onChange={(e) => setFormData({ ...formData, capacity: +e.target.value })}
                     className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
                     placeholder="Ej: 20"
                   />
+                  {formErrors.capacity && <span className="text-red-500 text-sm">{formErrors.capacity}</span>}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -197,19 +251,23 @@ const AreasManagement = () => {
                   <label className="block text-sm font-medium text-gray-700">Gerente</label>
                   <input
                     type="text"
-                    defaultValue={selectedArea?.details?.manager}
+                    value={formData.manager}
+                    onChange={(e) => setFormData({ ...formData, manager: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
                     placeholder="Ej: Juan Pérez"
                   />
+                  {formErrors.manager && <span className="text-red-500 text-sm">{formErrors.manager}</span>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Ubicación</label>
                   <input
                     type="text"
-                    defaultValue={selectedArea?.details?.location}
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
                     placeholder="Ej: Piso 1"
                   />
+                  {formErrors.location && <span className="text-red-500 text-sm">{formErrors.location}</span>}
                 </div>
               </div>
               <div className="flex justify-end space-x-4 mt-6">
@@ -238,4 +296,4 @@ const AreasManagement = () => {
   );
 };
 
-export default AreasManagement; 
+export default AreasManagement;

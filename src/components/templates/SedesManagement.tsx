@@ -152,8 +152,8 @@ const SedesManagement = () => {
                     </span>
                   </td>
                   <td className="px-4 py-2 text-sm flex gap-2">
-                    <button className="text-blue-500 hover:text-blue-700" onClick={() => handleEditSede(sede)}>
-                      <Edit className="w-4 h-4" />
+                  <button className="text-[#5D0F1D] hover:text-[#7A1E2E]" onClick={() => handleEditSede(sede)}>
+                  <Edit className="w-4 h-4" />
                     </button>
                     <button className="text-red-500 hover:text-red-700" onClick={() => handleDeleteSede(sede)}>
                       <Trash2 className="w-4 h-4" />
