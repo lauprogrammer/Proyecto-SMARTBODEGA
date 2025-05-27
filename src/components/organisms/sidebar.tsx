@@ -1,7 +1,8 @@
-import { ChevronDown, ChevronUp, LogOut, Users, Building2, Landmark, LayoutGrid, MapPin, User, Package, Boxes, ClipboardList, Truck, Warehouse, UserCog, UserCheck, Settings, Key, FileText, BarChart2 } from "lucide-react";
+import { ChevronDown, ChevronUp, LogOut, Users, Building2, Landmark, LayoutGrid, MapPin, User, Package, Boxes, ClipboardList, Truck, Warehouse, UserCog, UserCheck, Settings, Key, FileText, BarChart2, Flag, Globe } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Profile from "../pages/Profile";
+
 const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: () => void }) => {
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -77,6 +78,17 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
           title: "Municipios", 
           path: '/municipios',
           icon: <MapPin className="w-4 h-4" /> 
+        },
+        {
+          title: "Sitios",
+          icon: <Globe className="w-4 h-4" />,
+          subItems: [
+            {
+              title: "Tipo de Sitio",
+              path: '/sitios',
+              icon: <Flag className="w-4 h-4" />
+            }
+          ]
         }
       ]
     },
@@ -209,58 +221,61 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
                 openMenus[menu.title] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
               )}
             </button>
-            
+
             {/* Submenús */}
-            {openMenus[menu.title] && menu.submenu.length > 0 && (
-              <div className="ml-4 mt-2 space-y-1">
-                {menu.submenu.map((submenu) => (
-                  <div key={submenu.title}>
-                    <button
-                      onClick={() => {
-                        if (submenu.subItems) {
-                          toggleMenu(submenu.title);
-                        } else if (submenu.path) {
-                          handleNavigation(submenu.path);
-                        }
-                      }}
-                      className={`w-full flex items-center justify-between space-x-2 px-4 py-2 rounded-lg transition-colors duration-200
-                        ${submenu.path && location.pathname === submenu.path
-                          ? "bg-[#CAB58A] text-black"
-                          : "text-gray-200 hover:text-white hover:bg-[#7A1E2E]"}
-                      `}
-                    >
-                      <div className="flex items-center space-x-2">
-                        {submenu.icon}
-                        <span>{submenu.title}</span>
-                      </div>
-                      {submenu.subItems && (
-                        openMenus[submenu.title] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                      )}
-                    </button>
-                    
-                    {/* Sub-submenús */}
-                    {submenu.subItems && openMenus[submenu.title] && (
-                      <div className="ml-4 mt-2 space-y-1">
-                        {submenu.subItems.map((subsubmenu) => (
-                          <button
-                            key={subsubmenu.title}
-                            onClick={() => subsubmenu.path && handleNavigation(subsubmenu.path)}
-                            className={`w-full flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200
-                              ${subsubmenu.path && location.pathname === subsubmenu.path
-                                ? "bg-[#CAB58A] text-black"
-                                : "text-gray-200 hover:text-white hover:bg-[#7A1E2E]"}
-                            `}
-                          >
-                            {subsubmenu.icon}
-                            <span>{subsubmenu.title}</span>
-                          </button>
-                        ))}
-                      </div>
+            <div
+              className={`ml-4 overflow-hidden transition-all duration-300 ease-in-out ${
+                openMenus[menu.title] ? 'max-h-[1000px] opacity-100 pointer-events-auto' : 'max-h-0 opacity-0 pointer-events-none'
+              } space-y-1`}
+            >
+              {menu.submenu.length > 0 && menu.submenu.map((submenu) => (
+                <div key={submenu.title}>
+                  <button
+                    onClick={() => {
+                      if (submenu.subItems) {
+                        toggleMenu(submenu.title);
+                      } else if (submenu.path) {
+                        handleNavigation(submenu.path);
+                      }
+                    }}
+                    className={`w-full flex items-center justify-between space-x-2 px-4 py-2 rounded-lg transition-colors duration-200
+                      ${submenu.path && location.pathname === submenu.path
+                        ? "bg-[#CAB58A] text-black"
+                        : "text-gray-200 hover:text-white hover:bg-[#7A1E2E]"}
+                    `}
+                  >
+                    <div className="flex items-center space-x-2">
+                      {submenu.icon}
+                      <span>{submenu.title}</span>
+                    </div>
+                    {submenu.subItems && (
+                      openMenus[submenu.title] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
                     )}
+                  </button>
+                  {/* Sub-submenús */}
+                  <div
+                    className={`ml-4 overflow-hidden transition-all duration-300 ease-in-out ${
+                      submenu.subItems && openMenus[submenu.title] ? 'max-h-[1000px] opacity-100 pointer-events-auto' : 'max-h-0 opacity-0 pointer-events-none'
+                    } space-y-1`}
+                  >
+                    {submenu.subItems && submenu.subItems.map((subsubmenu) => (
+                      <button
+                        key={subsubmenu.title}
+                        onClick={() => subsubmenu.path && handleNavigation(subsubmenu.path)}
+                        className={`w-full flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200
+                          ${subsubmenu.path && location.pathname === subsubmenu.path
+                            ? "bg-[#CAB58A] text-black"
+                            : "text-gray-200 hover:text-white hover:bg-[#7A1E2E]"}
+                        `}
+                      >
+                        {subsubmenu.icon}
+                        <span>{subsubmenu.title}</span>
+                      </button>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
 
@@ -284,3 +299,4 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
 };
 
 export default Sidebar;
+

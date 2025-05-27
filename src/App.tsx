@@ -21,6 +21,8 @@ import Statistics from './components/pages/Statistics';
 import Features from './components/pages/Features';
 import Navbar from './components/organisms/navbar';
 import Sidebar from './components/organisms/sidebar';
+import Sitios from './components/pages/Sitios';
+import SitioProductos from './components/pages/SitioProductos';
 
 const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -34,15 +36,17 @@ const LayoutWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   }, [theme]);
 
   return (
-    <div className={`min-h-screen bg-gray-100 dark:bg-gray-900 ${theme}`}>
+    <div className={`min-h-screen bg-background ${theme}`}>
       <Navbar toggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} toggleTheme={toggleTheme} />
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <main 
-        className={`transition-all duration-300 ease-in-out pt-20 px-6 ${
+        className={`transition-all duration-300 ease-in-out pt-20 ${
           isSidebarOpen ? 'ml-64' : 'ml-0'
         }`}
       >
-        {children}
+        <div className="container mx-auto px-4">
+          {children}
+        </div>
       </main>
     </div>
   );
@@ -86,6 +90,8 @@ const App = () => {
           <Route path="/reports" element={<LayoutWrapper><Reports /></LayoutWrapper>} />
           <Route path="/statistics" element={<LayoutWrapper><Statistics /></LayoutWrapper>} />
           <Route path="/features" element={<LayoutWrapper><Features /></LayoutWrapper>} />
+          <Route path="/sitios" element={<LayoutWrapper><Sitios /></LayoutWrapper>} />
+          <Route path="/sitios/:id/productos" element={<LayoutWrapper><SitioProductos /></LayoutWrapper>} />
         </Routes>
       </div>
     </>
