@@ -1,8 +1,7 @@
 import React from 'react';
 import { Pagination, Selection, SortDescriptor } from "@nextui-org/react";
-import { SiteTable } from '../../organisms/sitios/SiteTable';
-import { SiteTableControls } from '../../organisms/sitios/SiteTableControls';
-import { Site, Column } from '../../../types/sitios';
+import { SiteTable } from '../organisms/SiteTable';
+import { SiteTableControls } from '../organisms/SiteTableControls';
 
 export interface SiteManagementLayoutProps {
   columns: Array<{ name: string; uid: string; sortable?: boolean }>;

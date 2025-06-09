@@ -1,5 +1,5 @@
 import React from 'react';
-import { SitesPage } from './sitios/SitesPage';
+import { SitesPage } from './SitesPage';
 
 const Sitios: React.FC = () => {
   return (

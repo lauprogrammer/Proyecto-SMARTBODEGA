@@ -8,8 +8,8 @@ import {
   DropdownItem,
   Selection,
 } from "@nextui-org/react";
-import { PlusIcon, SearchIcon, ChevronDownIcon } from "../../../icons";
-import { columns, statusOptions, typeOptions } from "../../../types/sitios";
+import { PlusIcon, SearchIcon, ChevronDownIcon } from "../../icons";
+import { columns, statusOptions, typeOptions } from "../../types/sitios";
 
 export interface SiteTableControlsProps {
   filterValue: string;
@@ -123,6 +123,7 @@ export const SiteTableControls: React.FC<SiteTableControlsProps> = ({
             </DropdownMenu>
           </Dropdown>
           <Button
+            className="bg-[#5D0F1D] text-white hover:bg-[#7A1E2E]"
             color="primary"
             endContent={<PlusIcon />}
             onPress={() => console.log("Agregar nuevo sitio")}

@@ -6,8 +6,8 @@ import {
   DropdownItem,
   Button,
 } from "@nextui-org/react";
-import { VerticalDotsIcon } from "../../../icons";
-import { Site } from "../../../types/sitios";
+import { VerticalDotsIcon } from "../../icons";
+import { Site } from "../../types/sitios";
 
 interface SiteActionButtonProps {
   site: Site;

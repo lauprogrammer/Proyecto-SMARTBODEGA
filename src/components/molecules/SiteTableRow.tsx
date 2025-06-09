@@ -1,9 +1,9 @@
 import React from 'react';
 import { TableRow, TableCell } from "@nextui-org/react";
-import { SiteTypeChip } from '../../atoms/sitios/SiteTypeChip';
-import { SiteStatusChip } from '../../atoms/sitios/SiteStatusChip';
-import { SiteUserAvatar } from '../../atoms/sitios/SiteUserAvatar';
-import { SiteActionButton } from '../../atoms/sitios/SiteActionButton';
+import { SiteTypeChip } from '../atoms/SiteTypeChip';
+import { SiteStatusChip } from '../atoms/SiteStatusChip';
+import { SiteUserAvatar } from '../atoms/SiteUserAvatar';
+import { SiteActionButton } from '../atoms/SiteActionButton';
 
 interface Site {
   id: number;

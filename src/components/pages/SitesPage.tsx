@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Selection, SortDescriptor } from "@nextui-org/react";
-import { SiteManagementLayout } from "../../templates/sitios/SiteManagementLayout";
-import { columns, statusOptions, typeOptions, sites } from "../../../types/sitios";
+import { SiteManagementLayout } from "../templates/SiteManagementLayout";
+import { columns, statusOptions, typeOptions, sites } from "../../types/sitios";
 
 export const SitesPage: React.FC = () => {
   const [filterValue, setFilterValue] = useState("");

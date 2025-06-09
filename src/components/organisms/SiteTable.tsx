@@ -11,9 +11,8 @@ import {
   Selection,
   SortDescriptor,
 } from "@nextui-org/react";
-import { Site } from "../../../types/sitios";
-import { SiteActionButton } from "../../molecules/sitios/SiteActionButton";
-import { VerticalDotsIcon } from "../../../icons";
+import { Site } from "../../types/sitios";
+import { SiteActionButton } from "../molecules/SiteActionButton";
 
 export interface SiteTableProps {
   columns: Array<{ name: string; uid: string; sortable?: boolean }>;
@@ -123,6 +122,8 @@ export const SiteTable: React.FC<SiteTableProps> = ({
       }
       classNames={{
         wrapper: "min-h-[222px]",
+        th: "bg-[#7A1E2E] text-white", // color vinotinto para encabezado
+
       }}
       selectedKeys={selectedKeys}
       selectionMode="multiple"
