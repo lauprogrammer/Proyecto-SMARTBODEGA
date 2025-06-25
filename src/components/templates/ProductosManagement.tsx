@@ -6,6 +6,7 @@ import {
   BarChart2, Settings, Calendar, User,
   Globe, Mail, Phone, Map, Boxes, DollarSign
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const ProductosManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,6 +15,8 @@ const ProductosManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedProducto, setSelectedProducto] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [productoToDelete, setProductoToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [formData, setFormData] = useState({
     nombre: '',
@@ -30,7 +33,7 @@ const ProductosManagement = () => {
   });
 
   // Datos de ejemplo
-  const productos = [
+  const [productos, setProductos] = useState([
     {
       id: 1,
       nombre: 'Laptop HP',
@@ -76,7 +79,7 @@ const ProductosManagement = () => {
         ubicacion: 'Estante C-3'
       }
     }
-  ];
+  ]);
 
   const handleProductoClick = (productoId: number) => {
     setExpandedProducto(expandedProducto === productoId ? null : productoId);
@@ -84,12 +87,46 @@ const ProductosManagement = () => {
 
   const handleEditProducto = (producto: any) => {
     setSelectedProducto(producto);
+    setFormData({
+      nombre: producto.nombre,
+      categoria: producto.categoria,
+      stock: producto.stock.toString(),
+      precio: producto.precio.toString(),
+      estado: producto.estado,
+      proveedor: producto.proveedor,
+      detalles: {
+        descripcion: producto.detalles.descripcion,
+        fechaIngreso: producto.detalles.fechaIngreso,
+        ubicacion: producto.detalles.ubicacion
+      }
+    });
     setShowModal(true);
   };
 
   const handleDeleteProducto = (producto: any) => {
-    setSelectedProducto(producto);
+    setProductoToDelete(producto);
     setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteProducto = async () => {
+    if (!productoToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      // Simular llamada a API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Eliminar el producto de la lista local
+      setProductos(prevProductos => prevProductos.filter(producto => producto.id !== productoToDelete.id));
+      
+      toast.success(`Producto "${productoToDelete.nombre}" eliminado exitosamente`);
+      setShowDeleteConfirm(false);
+      setProductoToDelete(null);
+    } catch (error) {
+      toast.error('Error al eliminar el producto');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -113,9 +150,55 @@ const ProductosManagement = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica para guardar el nuevo producto
-    console.log('Nuevo producto:', formData);
+    
+    if (selectedProducto) {
+      // Actualizar producto existente
+      setProductos(prevProductos => 
+        prevProductos.map(producto => 
+          producto.id === selectedProducto.id 
+            ? {
+                ...producto,
+                nombre: formData.nombre,
+                categoria: formData.categoria,
+                stock: parseInt(formData.stock),
+                precio: parseFloat(formData.precio),
+                estado: formData.estado,
+                proveedor: formData.proveedor,
+                detalles: {
+                  ...producto.detalles,
+                  descripcion: formData.detalles.descripcion,
+                  fechaIngreso: formData.detalles.fechaIngreso,
+                  ubicacion: formData.detalles.ubicacion,
+                  ultimaActualizacion: new Date().toISOString().split('T')[0]
+                }
+              }
+            : producto
+        )
+      );
+      toast.success(`Producto "${formData.nombre}" actualizado exitosamente`);
+    } else {
+      // Crear nuevo producto
+      const newProducto = {
+        id: Math.max(...productos.map(p => p.id)) + 1,
+        nombre: formData.nombre,
+        categoria: formData.categoria,
+        stock: parseInt(formData.stock),
+        precio: parseFloat(formData.precio),
+        estado: formData.estado,
+        proveedor: formData.proveedor,
+        detalles: {
+          descripcion: formData.detalles.descripcion,
+          fechaIngreso: formData.detalles.fechaIngreso,
+          ubicacion: formData.detalles.ubicacion,
+          ultimaActualizacion: new Date().toISOString().split('T')[0]
+        }
+      };
+      setProductos(prevProductos => [...prevProductos, newProducto]);
+      toast.success(`Producto "${formData.nombre}" creado exitosamente`);
+    }
+    
     setShowModal(false);
+    setSelectedProducto(null);
     setFormData({
       nombre: '',
       categoria: '',
@@ -130,6 +213,18 @@ const ProductosManagement = () => {
       }
     });
   };
+
+  const filteredProductos = productos.filter(producto => {
+    const matchesSearch = producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         producto.categoria.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         producto.proveedor.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesFilter = selectedFilter === 'all' || 
+                         (selectedFilter === 'active' && producto.estado === 'Activo') ||
+                         (selectedFilter === 'inactive' && producto.estado === 'Inactivo');
+    
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <div className="bg-gray-50">
@@ -154,7 +249,23 @@ const ProductosManagement = () => {
                 {viewMode === 'grid' ? 'Vista Lista' : 'Vista Cuadrícula'}
               </button>
               <button 
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setShowModal(true);
+                  setSelectedProducto(null);
+                  setFormData({
+                    nombre: '',
+                    categoria: '',
+                    stock: '',
+                    precio: '',
+                    estado: 'Activo',
+                    proveedor: '',
+                    detalles: {
+                      descripcion: '',
+                      fechaIngreso: '',
+                      ubicacion: ''
+                    }
+                  });
+                }}
                 className="flex items-center space-x-2 bg-[#5D0F1D] text-white px-6 py-3 rounded-xl hover:bg-[#7A1E2E] transition-colors shadow-lg"
               >
                 <Plus className="w-5 h-5" />
@@ -164,7 +275,7 @@ const ProductosManagement = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-[#5D0F1D] bg-opacity-10 p-4 rounded-xl">
               <div className="flex items-center justify-between">
                 <div>
@@ -239,7 +350,7 @@ const ProductosManagement = () => {
 
         {/* Productos Grid/List */}
         <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-6'}>
-          {productos.map((producto) => (
+          {filteredProductos.map((producto) => (
             <div 
               key={producto.id} 
               className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl ${
@@ -260,12 +371,14 @@ const ProductosManagement = () => {
                     <button 
                       onClick={() => handleEditProducto(producto)}
                       className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      title="Editar producto"
                     >
                       <Edit className="w-5 h-5 text-gray-600" />
                     </button>
                     <button 
                       onClick={() => handleDeleteProducto(producto)}
                       className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      title="Eliminar producto"
                     >
                       <Trash2 className="w-5 h-5 text-red-600" />
                     </button>
@@ -316,14 +429,32 @@ const ProductosManagement = () => {
         </div>
       </div>
 
-      {/* Modal de Nuevo Producto */}
+      {/* Modal de Nuevo/Editar Producto */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-[#5D0F1D]">Nuevo Producto</h2>
+              <h2 className="text-2xl font-bold text-[#5D0F1D]">
+                {selectedProducto ? 'Editar Producto' : 'Nuevo Producto'}
+              </h2>
               <button 
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setSelectedProducto(null);
+                  setFormData({
+                    nombre: '',
+                    categoria: '',
+                    stock: '',
+                    precio: '',
+                    estado: 'Activo',
+                    proveedor: '',
+                    detalles: {
+                      descripcion: '',
+                      fechaIngreso: '',
+                      ubicacion: ''
+                    }
+                  });
+                }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="w-6 h-6" />
@@ -406,7 +537,7 @@ const ProductosManagement = () => {
                     required
                   />
                 </div>
-                <div className="relative md:col-span-2">
+                <div className="relative">
                   <textarea
                     name="detalles.descripcion"
                     value={formData.detalles.descripcion}
@@ -441,10 +572,27 @@ const ProductosManagement = () => {
                   </select>
                 </div>
               </div>
+              
               <div className="flex justify-end space-x-4 mt-6">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setSelectedProducto(null);
+                    setFormData({
+                      nombre: '',
+                      categoria: '',
+                      stock: '',
+                      precio: '',
+                      estado: 'Activo',
+                      proveedor: '',
+                      detalles: {
+                        descripcion: '',
+                        fechaIngreso: '',
+                        ubicacion: ''
+                      }
+                    });
+                  }}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Cancelar
@@ -453,10 +601,44 @@ const ProductosManagement = () => {
                   type="submit"
                   className="px-4 py-2 bg-[#5D0F1D] text-white rounded-lg hover:bg-[#7A1E2E]"
                 >
-                  Crear Producto
+                  {selectedProducto ? 'Actualizar' : 'Crear'} Producto
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de eliminación */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+            <div className="flex items-center space-x-4 mb-4">
+              <Trash2 className="w-6 h-6 text-red-600" />
+              <h2 className="text-xl font-bold text-gray-800">Confirmar Eliminación</h2>
+            </div>
+            <p className="text-gray-600 mb-4">
+              ¿Estás seguro que deseas eliminar el producto "{productoToDelete?.nombre}"? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setProductoToDelete(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                disabled={isDeleting}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteProducto}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
           </div>
         </div>
       )}

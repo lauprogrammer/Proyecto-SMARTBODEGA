@@ -1,14 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Search, Plus, Edit, Trash2, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'react-hot-toast';
+
+// Esquema de validación con Zod
+const CenterSchema = z.object({
+  name: z.string().min(1, 'El nombre del centro es requerido'),
+  location: z.string().min(1, 'La ubicación es requerida'),
+  type: z.string().min(1, 'El tipo es requerido'),
+  status: z.enum(['Activo', 'Inactivo']),
+  address: z.string().min(1, 'La dirección es requerida'),
+  phone: z.string().min(1, 'El teléfono es requerido'),
+  email: z.string().email('Email inválido'),
+  manager: z.string().min(1, 'El gerente es requerido')
+});
+
+type CenterFormValues = z.infer<typeof CenterSchema>;
 
 const CentersManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedCenter, setSelectedCenter] = useState<any>(null);
   const [expandedCenter, setExpandedCenter] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [centerToDelete, setCenterToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Datos de ejemplo para centros
-  const centers = [
+  const [centers, setCenters] = useState([
     {
       id: 1,
       name: 'Centro Principal',
@@ -54,7 +74,21 @@ const CentersManagement = () => {
         lastUpdate: '2024-04-16'
       }
     }
-  ];
+  ]);
+
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<CenterFormValues>({
+    resolver: zodResolver(CenterSchema),
+    defaultValues: {
+      name: '',
+      location: '',
+      type: '',
+      status: 'Activo',
+      address: '',
+      phone: '',
+      email: '',
+      manager: ''
+    }
+  });
 
   const handleCenterClick = (centerId: number) => {
     setExpandedCenter(expandedCenter === centerId ? null : centerId);
@@ -62,12 +96,92 @@ const CentersManagement = () => {
 
   const handleEditCenter = (center: any) => {
     setSelectedCenter(center);
+    setValue('name', center.name);
+    setValue('location', center.location);
+    setValue('type', center.type);
+    setValue('status', center.status);
+    setValue('address', center.details.address);
+    setValue('phone', center.details.phone);
+    setValue('email', center.details.email);
+    setValue('manager', center.details.manager);
     setShowModal(true);
   };
 
   const handleDeleteCenter = (center: any) => {
-    // Aquí iría la lógica para eliminar el centro
-    console.log(`Eliminando centro: ${center.name}`);
+    setCenterToDelete(center);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteCenter = async () => {
+    if (!centerToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      // Simular llamada a API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Eliminar el centro de la lista local
+      setCenters(prevCenters => prevCenters.filter(center => center.id !== centerToDelete.id));
+      
+      toast.success(`Centro "${centerToDelete.name}" eliminado exitosamente`);
+      setShowDeleteConfirm(false);
+      setCenterToDelete(null);
+    } catch (error) {
+      toast.error('Error al eliminar el centro');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const onSubmit = (data: CenterFormValues) => {
+    if (selectedCenter) {
+      // Actualizar centro existente
+      setCenters(prevCenters => 
+        prevCenters.map(center => 
+          center.id === selectedCenter.id 
+            ? {
+                ...center,
+                name: data.name,
+                location: data.location,
+                type: data.type,
+                status: data.status,
+                details: {
+                  ...center.details,
+                  address: data.address,
+                  phone: data.phone,
+                  email: data.email,
+                  manager: data.manager,
+                  lastUpdate: new Date().toISOString().split('T')[0]
+                }
+              }
+            : center
+        )
+      );
+      toast.success(`Centro "${data.name}" actualizado exitosamente`);
+    } else {
+      // Crear nuevo centro
+      const newCenter = {
+        id: Math.max(...centers.map(c => c.id)) + 1,
+        name: data.name,
+        location: data.location,
+        type: data.type,
+        status: data.status,
+        details: {
+          address: data.address,
+          phone: data.phone,
+          email: data.email,
+          manager: data.manager,
+          created: new Date().toISOString().split('T')[0],
+          lastUpdate: new Date().toISOString().split('T')[0]
+        }
+      };
+      setCenters(prevCenters => [...prevCenters, newCenter]);
+      toast.success(`Centro "${data.name}" creado exitosamente`);
+    }
+    
+    setShowModal(false);
+    setSelectedCenter(null);
+    reset();
   };
 
   const filteredCenters = centers.filter(center =>
@@ -86,7 +200,11 @@ const CentersManagement = () => {
               <h1 className="text-2xl font-bold text-[#5D0F1D]">Gestión de Centros</h1>
               <button 
                 className="flex items-center space-x-2 bg-[#5D0F1D] text-white px-4 py-2 rounded-lg hover:bg-[#7A1E2E] transition-colors duration-200"
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setShowModal(true);
+                  reset();
+                  setSelectedCenter(null);
+                }}
               >
                 <Plus className="w-5 h-5" />
                 <span>Nuevo Centro</span>
@@ -136,6 +254,7 @@ const CentersManagement = () => {
                           handleEditCenter(center);
                         }}
                         className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                        title="Editar centro"
                       >
                         <Edit className="w-4 h-4 text-gray-600" />
                       </button>
@@ -145,6 +264,7 @@ const CentersManagement = () => {
                           handleDeleteCenter(center);
                         }}
                         className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                        title="Eliminar centro"
                       >
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </button>
@@ -199,7 +319,7 @@ const CentersManagement = () => {
       {/* Modal de Crear/Editar Centro */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-2xl w-full">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-[#5D0F1D]">
                 {selectedCenter ? 'Editar Centro' : 'Nuevo Centro'}
@@ -208,102 +328,143 @@ const CentersManagement = () => {
                 onClick={() => {
                   setShowModal(false);
                   setSelectedCenter(null);
+                  reset();
                 }}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <form className="space-y-4">
+            
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Nombre del Centro</label>
                   <input
-                    type="text"
-                    defaultValue={selectedCenter?.name}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    {...register('name')}
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      errors.name ? 'border-red-500' : ''
+                    }`}
                     placeholder="Ej: Centro Principal"
                   />
+                  {errors.name && (
+                    <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Ubicación</label>
                   <input
-                    type="text"
-                    defaultValue={selectedCenter?.location}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    {...register('location')}
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      errors.location ? 'border-red-500' : ''
+                    }`}
                     placeholder="Ej: Ciudad A"
                   />
+                  {errors.location && (
+                    <p className="text-sm text-red-500 mt-1">{errors.location.message}</p>
+                  )}
                 </div>
               </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Tipo</label>
                   <select
-                    defaultValue={selectedCenter?.type}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    {...register('type')}
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      errors.type ? 'border-red-500' : ''
+                    }`}
                   >
                     <option value="">Seleccionar tipo</option>
                     <option value="Sede Principal">Sede Principal</option>
                     <option value="Sede Secundaria">Sede Secundaria</option>
                   </select>
+                  {errors.type && (
+                    <p className="text-sm text-red-500 mt-1">{errors.type.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Estado</label>
                   <select
-                    defaultValue={selectedCenter?.status}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    {...register('status')}
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      errors.status ? 'border-red-500' : ''
+                    }`}
                   >
                     <option value="Activo">Activo</option>
                     <option value="Inactivo">Inactivo</option>
                   </select>
+                  {errors.status && (
+                    <p className="text-sm text-red-500 mt-1">{errors.status.message}</p>
+                  )}
                 </div>
               </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Dirección</label>
                   <input
-                    type="text"
-                    defaultValue={selectedCenter?.details?.address}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    {...register('address')}
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      errors.address ? 'border-red-500' : ''
+                    }`}
                     placeholder="Ej: Calle 123 #45-67"
                   />
+                  {errors.address && (
+                    <p className="text-sm text-red-500 mt-1">{errors.address.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Teléfono</label>
                   <input
-                    type="tel"
-                    defaultValue={selectedCenter?.details?.phone}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    {...register('phone')}
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      errors.phone ? 'border-red-500' : ''
+                    }`}
                     placeholder="Ej: 123-456-7890"
                   />
+                  {errors.phone && (
+                    <p className="text-sm text-red-500 mt-1">{errors.phone.message}</p>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Email</label>
                   <input
+                    {...register('email')}
                     type="email"
-                    defaultValue={selectedCenter?.details?.email}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      errors.email ? 'border-red-500' : ''
+                    }`}
                     placeholder="ejemplo@correo.com"
                   />
+                  {errors.email && (
+                    <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Gerente</label>
                   <input
-                    type="text"
-                    defaultValue={selectedCenter?.details?.manager}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    {...register('manager')}
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      errors.manager ? 'border-red-500' : ''
+                    }`}
                     placeholder="Nombre del gerente"
                   />
+                  {errors.manager && (
+                    <p className="text-sm text-red-500 mt-1">{errors.manager.message}</p>
+                  )}
                 </div>
               </div>
+              
               <div className="flex justify-end space-x-4 mt-6">
                 <button
                   type="button"
                   onClick={() => {
                     setShowModal(false);
                     setSelectedCenter(null);
+                    reset();
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
@@ -317,6 +478,40 @@ const CentersManagement = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de eliminación */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+            <div className="flex items-center space-x-4 mb-4">
+              <Trash2 className="w-6 h-6 text-red-600" />
+              <h2 className="text-xl font-bold text-gray-800">Confirmar Eliminación</h2>
+            </div>
+            <p className="text-gray-600 mb-4">
+              ¿Estás seguro que deseas eliminar el centro "{centerToDelete?.name}"? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setCenterToDelete(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                disabled={isDeleting}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteCenter}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
           </div>
         </div>
       )}

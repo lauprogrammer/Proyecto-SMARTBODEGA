@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Building2, Search, Plus, Edit, Trash2, X } from 'lucide-react';
 import { z } from 'zod';
+import { toast } from 'react-hot-toast';
 
 // Esquema de validación con Zod
 const sedeSchema = z.object({
@@ -19,9 +20,12 @@ const SedesManagement = () => {
   const [selectedSede, setSelectedSede] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [sedeToDelete, setSedeToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Datos de ejemplo
-  const sedes = [
+  const [sedes, setSedes] = useState([
     {
       id: 1,
       name: 'Sede Principal',
@@ -48,7 +52,7 @@ const SedesManagement = () => {
         manager: 'María García'
       }
     }
-  ];
+  ]);
 
   // Filtrar sedes según búsqueda
   const filteredSedes = sedes.filter(sede =>
@@ -64,7 +68,29 @@ const SedesManagement = () => {
 
   // Eliminar sede
   const handleDeleteSede = (sede: any) => {
-    console.log(`Eliminando sede: ${sede.name}`);
+    setSedeToDelete(sede);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteSede = async () => {
+    if (!sedeToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      // Simular llamada a API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Eliminar la sede de la lista local
+      setSedes(prevSedes => prevSedes.filter(sede => sede.id !== sedeToDelete.id));
+      
+      toast.success(`Sede "${sedeToDelete.name}" eliminada exitosamente`);
+      setShowDeleteConfirm(false);
+      setSedeToDelete(null);
+    } catch (error) {
+      toast.error('Error al eliminar la sede');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Enviar formulario
@@ -92,7 +118,47 @@ const SedesManagement = () => {
       });
       setFormErrors(errors);
     } else {
-      console.log('Datos válidos:', result.data);
+      if (selectedSede) {
+        // Actualizar sede existente
+        setSedes(prevSedes => 
+          prevSedes.map(sede => 
+            sede.id === selectedSede.id 
+              ? {
+                  ...sede,
+                  name: result.data.name,
+                  location: result.data.location,
+                  type: result.data.type,
+                  status: result.data.status,
+                  details: {
+                    address: result.data.address,
+                    phone: result.data.phone,
+                    email: result.data.email,
+                    manager: result.data.manager
+                  }
+                }
+              : sede
+          )
+        );
+        toast.success(`Sede "${result.data.name}" actualizada exitosamente`);
+      } else {
+        // Crear nueva sede
+        const newSede = {
+          id: Math.max(...sedes.map(s => s.id)) + 1,
+          name: result.data.name,
+          location: result.data.location,
+          type: result.data.type,
+          status: result.data.status,
+          details: {
+            address: result.data.address,
+            phone: result.data.phone,
+            email: result.data.email,
+            manager: result.data.manager
+          }
+        };
+        setSedes(prevSedes => [...prevSedes, newSede]);
+        toast.success(`Sede "${result.data.name}" creada exitosamente`);
+      }
+      
       setFormErrors({});
       setShowModal(false);
       setSelectedSede(null);
@@ -109,7 +175,11 @@ const SedesManagement = () => {
               <h1 className="text-2xl font-bold text-[#5D0F1D]">Gestión de Sedes</h1>
               <button 
                 className="flex items-center space-x-2 bg-[#5D0F1D] text-white px-4 py-2 rounded-lg hover:bg-[#7A1E2E] transition-colors duration-200"
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setShowModal(true);
+                  setSelectedSede(null);
+                  setFormErrors({});
+                }}
               >
                 <Plus className="w-5 h-5" />
                 <span>Nueva Sede</span>
@@ -129,7 +199,7 @@ const SedesManagement = () => {
         </div>
 
         {/* Tabla de sedes */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-[#5D0F1D]">
               <tr>
@@ -152,10 +222,18 @@ const SedesManagement = () => {
                     </span>
                   </td>
                   <td className="px-4 py-2 text-sm flex gap-2">
-                  <button className="text-[#5D0F1D] hover:text-[#7A1E2E]" onClick={() => handleEditSede(sede)}>
-                  <Edit className="w-4 h-4" />
+                    <button 
+                      className="text-[#5D0F1D] hover:text-[#7A1E2E]" 
+                      onClick={() => handleEditSede(sede)}
+                      title="Editar sede"
+                    >
+                      <Edit className="w-4 h-4" />
                     </button>
-                    <button className="text-red-500 hover:text-red-700" onClick={() => handleDeleteSede(sede)}>
+                    <button 
+                      className="text-red-500 hover:text-red-700" 
+                      onClick={() => handleDeleteSede(sede)}
+                      title="Eliminar sede"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </td>
@@ -168,7 +246,7 @@ const SedesManagement = () => {
         {/* Modal de formulario */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 max-w-2xl w-full">
+            <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-[#5D0F1D]">
                   {selectedSede ? 'Editar Sede' : 'Nueva Sede'}
@@ -185,17 +263,29 @@ const SedesManagement = () => {
                 </button>
               </div>
 
-              <form className="space-y-4" onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Primera fila */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                    <input name="name" defaultValue={selectedSede?.name} className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]" />
+                    <input 
+                      name="name" 
+                      defaultValue={selectedSede?.name} 
+                      className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                        formErrors.name ? 'border-red-500' : ''
+                      }`}
+                    />
                     {formErrors.name && <p className="text-red-500 text-sm">{formErrors.name}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Ubicación</label>
-                    <input name="location" defaultValue={selectedSede?.location} className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]" />
+                    <input 
+                      name="location" 
+                      defaultValue={selectedSede?.location} 
+                      className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                        formErrors.location ? 'border-red-500' : ''
+                      }`}
+                    />
                     {formErrors.location && <p className="text-red-500 text-sm">{formErrors.location}</p>}
                   </div>
                 </div>
@@ -204,7 +294,13 @@ const SedesManagement = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Tipo</label>
-                    <select name="type" defaultValue={selectedSede?.type} className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]">
+                    <select 
+                      name="type" 
+                      defaultValue={selectedSede?.type} 
+                      className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                        formErrors.type ? 'border-red-500' : ''
+                      }`}
+                    >
                       <option value="Principal">Principal</option>
                       <option value="Secundaria">Secundaria</option>
                     </select>
@@ -212,7 +308,13 @@ const SedesManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Estado</label>
-                    <select name="status" defaultValue={selectedSede?.status} className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]">
+                    <select 
+                      name="status" 
+                      defaultValue={selectedSede?.status} 
+                      className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                        formErrors.status ? 'border-red-500' : ''
+                      }`}
+                    >
                       <option value="Activo">Activo</option>
                       <option value="Inactivo">Inactivo</option>
                     </select>
@@ -224,12 +326,24 @@ const SedesManagement = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Dirección</label>
-                    <input name="address" defaultValue={selectedSede?.details?.address} className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]" />
+                    <input 
+                      name="address" 
+                      defaultValue={selectedSede?.details?.address} 
+                      className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                        formErrors.address ? 'border-red-500' : ''
+                      }`}
+                    />
                     {formErrors.address && <p className="text-red-500 text-sm">{formErrors.address}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Teléfono</label>
-                    <input name="phone" defaultValue={selectedSede?.details?.phone} className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]" />
+                    <input 
+                      name="phone" 
+                      defaultValue={selectedSede?.details?.phone} 
+                      className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                        formErrors.phone ? 'border-red-500' : ''
+                      }`}
+                    />
                     {formErrors.phone && <p className="text-red-500 text-sm">{formErrors.phone}</p>}
                   </div>
                 </div>
@@ -238,22 +352,79 @@ const SedesManagement = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Email</label>
-                    <input name="email" defaultValue={selectedSede?.details?.email} className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]" />
+                    <input 
+                      name="email" 
+                      defaultValue={selectedSede?.details?.email} 
+                      className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                        formErrors.email ? 'border-red-500' : ''
+                      }`}
+                    />
                     {formErrors.email && <p className="text-red-500 text-sm">{formErrors.email}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Gerente</label>
-                    <input name="manager" defaultValue={selectedSede?.details?.manager} className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]" />
+                    <input 
+                      name="manager" 
+                      defaultValue={selectedSede?.details?.manager} 
+                      className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                        formErrors.manager ? 'border-red-500' : ''
+                      }`}
+                    />
                     {formErrors.manager && <p className="text-red-500 text-sm">{formErrors.manager}</p>}
                   </div>
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end space-x-4 mt-6">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setShowModal(false);
+                      setSelectedSede(null);
+                      setFormErrors({});
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancelar
+                  </button>
                   <button type="submit" className="bg-[#5D0F1D] text-white px-6 py-2 rounded-lg hover:bg-[#7A1E2E]">
-                    Guardar
+                    {selectedSede ? 'Actualizar' : 'Guardar'}
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de confirmación de eliminación */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 max-w-md w-full">
+              <div className="flex items-center space-x-4 mb-4">
+                <Trash2 className="w-6 h-6 text-red-600" />
+                <h2 className="text-xl font-bold text-gray-800">Confirmar Eliminación</h2>
+              </div>
+              <p className="text-gray-600 mb-4">
+                ¿Estás seguro que deseas eliminar la sede "{sedeToDelete?.name}"? Esta acción no se puede deshacer.
+              </p>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setSedeToDelete(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  disabled={isDeleting}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmDeleteSede}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Eliminando...' : 'Eliminar'}
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp, LogOut, Users, Building2, Landmark, LayoutGrid,
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Profile from "../pages/Profile";
+import { useAuth } from "@/context/AuthContext";
 
 const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: () => void }) => {
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
@@ -10,6 +11,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout, isAuthenticated } = useAuth();
 
   const toggleMenu = (menu: string) => {
     setOpenMenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
@@ -27,9 +29,15 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
     toggleSidebar();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
+
+  // Si no está autenticado, no mostrar el sidebar
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   const menuItems = [
     {
@@ -127,7 +135,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
             }
           ]
         },
-        { title: "Almacenes", icon: <Warehouse className="w-4 h-4" /> }
+      
       ]
     },
     {
@@ -159,7 +167,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
           isOpen ? "translate-x-0" : "-translate-x-full"
         } fixed z-50`}
       >
-        {/* Header */}
+        {/* Header con información del usuario */}
         <div className="mt-8 mb-8 flex flex-col items-center relative">
           <button 
             onClick={toggleProfile}
@@ -167,7 +175,13 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
           >
             <User className="w-10 h-10 text-[#5D0F1D]" />
           </button>
-          <div className="text-xl font-bold text-center">ADMINISTRADOR</div>
+          <div className="text-center">
+            <div className="text-lg font-bold">{user.nombre} {user.apellido}</div>
+            <div className="text-sm text-gray-300 capitalize">{user.rol}</div>
+            <div className="text-xs text-gray-400 mt-1">{user.email}</div>
+            <div className="text-xs text-gray-400">{user.centro}</div>
+            <div className="text-xs text-[#EACF99] font-medium mt-1">Sistema Administrativo</div>
+          </div>
           
           {/* Menú del perfil */}
           {isProfileOpen && (
@@ -283,7 +297,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
         <div className="absolute bottom-4 left-4 right-4">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center justify-center bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 rounded-lg transition-colors duration-200"
+            className="w-full flex items-center justify-center bg-[#EACF99] hover:bg-[#D4B88A] text-[#5D0F1D] font-bold py-2 rounded-lg transition-colors duration-200"
           >
             <LogOut className="w-5 h-5 mr-2" />
             Cerrar Sesión

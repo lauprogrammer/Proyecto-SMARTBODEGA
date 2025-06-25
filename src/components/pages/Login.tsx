@@ -3,14 +3,17 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { LoginCredentials } from '@/types/user';
 
-// 1. Definir esquema Zod
+// 1. Definir esquema Zod para login con email
 const loginSchema = z.object({
-  nombre: z.string().min(1, 'El nombre es obligatorio'),
-  contraseña: z.string().min(1, 'La contraseña es obligatoria'),
+  email: z.string().email('Email inválido').min(1, 'El email es obligatorio'),
+  password: z.string().min(1, 'La contraseña es obligatoria').min(6, 'La contraseña debe tener al menos 6 caracteres'),
   rol: z.enum(['administrador', 'supervisor', 'operador', 'invitado'], {
-    errorMap: () => ({ message: 'Debe seleccionar un rol válido' }),
-  }),
+    required_error: 'El rol es obligatorio',
+    invalid_type_error: 'Rol inválido'
+  })
 });
 
 // 2. Tipo TypeScript inferido automáticamente
@@ -18,15 +21,26 @@ type LoginData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, loading } = useAuth();
   
   // 3. Usar useForm con Zod
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginData>({
+  const { register, handleSubmit, formState: { errors }, setError } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data: LoginData) => {
-    console.log('Datos validados:', data);
-    navigate('/dashboard');
+  const onSubmit = async (data: LoginData) => {
+    const credentials: LoginCredentials = {
+      email: data.email,
+      password: data.password,
+      rol: data.rol
+    };
+
+    const success = await login(credentials);
+    if (success) {
+      navigate('/dashboard');
+    } else {
+      setError('rol', { type: 'manual', message: 'El rol no coincide con el usuario o no tiene acceso.' });
+    }
   };
 
   return (
@@ -53,35 +67,39 @@ const Login = () => {
           />
         </div>
 
-        <h2 className="text-2xl font-bold text-center text-white mb-6">INGRESAR</h2>
+        <h2 className="text-2xl font-bold text-center text-white mb-6">INGRESAR AL SISTEMA</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <input
-              type="text"
-              placeholder="Nombre"
-              {...register('nombre')}
+              type="email"
+              placeholder="Correo electrónico"
+              {...register('email')}
               className="w-full px-4 py-2 rounded bg-white bg-opacity-90 border border-gray-300 focus:outline-none focus:border-blue-500"
+              disabled={loading}
             />
-            {errors.nombre && <p className="text-red-500 text-sm">{errors.nombre.message}</p>}
+            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
           </div>
 
           <div>
             <input
               type="password"
               placeholder="Contraseña"
-              {...register('contraseña')}
+              {...register('password')}
               className="w-full px-4 py-2 rounded bg-white bg-opacity-90 border border-gray-300 focus:outline-none focus:border-blue-500"
+              disabled={loading}
             />
-            {errors.contraseña && <p className="text-red-500 text-sm">{errors.contraseña.message}</p>}
+            {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
           </div>
 
           <div>
             <select
               {...register('rol')}
               className="w-full px-4 py-2 rounded bg-white bg-opacity-90 border border-gray-300 focus:outline-none focus:border-blue-500"
+              disabled={loading}
+              defaultValue=""
             >
-              <option value="">Seleccione un rol</option>
+              <option value="" disabled>Seleccione un rol</option>
               <option value="administrador">Administrador</option>
               <option value="supervisor">Supervisor</option>
               <option value="operador">Operador</option>
@@ -92,11 +110,28 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-[#5D0F1D] hover:bg-[#4A0C17] text-white font-semibold rounded transition duration-200"
+            disabled={loading}
+            className={`w-full py-2 px-4 text-white font-semibold rounded transition duration-200 ${
+              loading 
+                ? 'bg-gray-500 cursor-not-allowed' 
+                : 'bg-[#5D0F1D] hover:bg-[#4A0C17]'
+            }`}
           >
-            Login
+            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
         </form>
+
+        {/* Información de prueba */}
+        <div className="mt-6 p-4 bg-white bg-opacity-10 rounded-lg">
+          <h3 className="text-white text-sm font-semibold mb-2">Acceso Restringido:</h3>
+          <div className="text-xs text-gray-300 space-y-1">
+            <p className="text-yellow-300 font-medium">Solo administradores pueden acceder</p>
+            <p><strong>Administrador:</strong> laura.ortiz@sena.edu.co / 123456</p>
+            <p><strong>Supervisor:</strong> maria.garcia@sena.edu.co / 123456</p>
+            <p><strong>Operador:</strong> carlos.lopez@sena.edu.co / 123456</p>
+            <p><strong>Invitado:</strong> ana.rodriguez@sena.edu.co / 123456</p>
+          </div>
+        </div>
       </div>
     </div>
   );

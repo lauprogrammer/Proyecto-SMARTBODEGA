@@ -10,6 +10,8 @@ import {
 } from "@nextui-org/react";
 import { PlusIcon, SearchIcon, ChevronDownIcon } from "../../icons";
 import { columns, statusOptions, typeOptions } from "../../types/sitios";
+import Modal from "../molecules/Modal";
+import SiteForm from "../molecules/SiteForm";
 
 export interface SiteTableControlsProps {
   filterValue: string;
@@ -23,6 +25,7 @@ export interface SiteTableControlsProps {
   totalSites: number;
   rowsPerPage: number;
   onRowsPerPageChange: (value: number) => void;
+  onAddSite: (data: any) => void;
 }
 
 export const SiteTableControls: React.FC<SiteTableControlsProps> = ({
@@ -37,7 +40,10 @@ export const SiteTableControls: React.FC<SiteTableControlsProps> = ({
   totalSites,
   rowsPerPage,
   onRowsPerPageChange,
+  onAddSite,
 }) => {
+  const [modalOpen, setModalOpen] = React.useState(false);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between gap-3 items-end">
@@ -126,7 +132,7 @@ export const SiteTableControls: React.FC<SiteTableControlsProps> = ({
             className="bg-[#5D0F1D] text-white hover:bg-[#7A1E2E]"
             color="primary"
             endContent={<PlusIcon />}
-            onPress={() => console.log("Agregar nuevo sitio")}
+            onPress={() => setModalOpen(true)}
           >
             Agregar Nuevo
           </Button>
@@ -149,6 +155,15 @@ export const SiteTableControls: React.FC<SiteTableControlsProps> = ({
           </select>
         </label>
       </div>
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Agregar Sitio">
+        <SiteForm
+          onSubmit={(data) => {
+            onAddSite(data);
+            setModalOpen(false);
+          }}
+          onCancel={() => setModalOpen(false)}
+        />
+      </Modal>
     </div>
   );
 }; 

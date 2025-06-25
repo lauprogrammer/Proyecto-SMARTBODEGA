@@ -2,8 +2,10 @@ import React, { useState, useCallback } from "react";
 import { Selection, SortDescriptor } from "@nextui-org/react";
 import { SiteManagementLayout } from "../templates/SiteManagementLayout";
 import { columns, statusOptions, typeOptions, sites } from "../../types/sitios";
+import { v4 as uuidv4 } from "uuid";
 
 export const SitesPage: React.FC = () => {
+  const [siteList, setSiteList] = useState(sites);
   const [filterValue, setFilterValue] = useState("");
   const [statusFilter, setStatusFilter] = useState<Selection>(new Set([]));
   const [typeFilter, setTypeFilter] = useState<Selection>(new Set([]));
@@ -19,7 +21,7 @@ export const SitesPage: React.FC = () => {
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
 
   const filteredItems = React.useMemo(() => {
-    let filteredSites = [...sites];
+    let filteredSites = [...siteList];
 
     if (filterValue) {
       filteredSites = filteredSites.filter((site) =>
@@ -40,7 +42,7 @@ export const SitesPage: React.FC = () => {
     }
 
     return filteredSites;
-  }, [sites, filterValue, statusFilter, typeFilter]);
+  }, [siteList, filterValue, statusFilter, typeFilter]);
 
   const sortedItems = React.useMemo(() => {
     return [...filteredItems].sort((a, b) => {
@@ -93,6 +95,19 @@ export const SitesPage: React.FC = () => {
     setSelectedKeys(keys);
   }, []);
 
+  const handleAddSite = (data: any) => {
+    const now = new Date().toISOString().split("T")[0];
+    setSiteList([
+      {
+        ...data,
+        id: uuidv4(),
+        createdAt: now,
+        updatedAt: now,
+      },
+      ...siteList,
+    ]);
+  };
+
   return (
     <SiteManagementLayout
       columns={columns}
@@ -117,6 +132,7 @@ export const SitesPage: React.FC = () => {
       page={page}
       onPageChange={setPage}
       totalPages={totalPages}
+      onAddSite={handleAddSite}
     />
   );
 }; 

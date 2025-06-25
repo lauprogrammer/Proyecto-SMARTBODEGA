@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'react-hot-toast';
 
 // Esquema de validación con zod
 const RoleSchema = z.object({
@@ -19,8 +20,11 @@ const RolesAndPermissions = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState<any>(null);
   const [expandedRole, setExpandedRole] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const roles = [
+  const [roles, setRoles] = useState([
     {
       id: 1,
       name: 'Administrador',
@@ -54,7 +58,7 @@ const RolesAndPermissions = () => {
         'Ver reportes básicos'
       ]
     }
-  ];
+  ]);
 
   const allPermissions = [
     'Gestionar usuarios',
@@ -96,11 +100,52 @@ const RolesAndPermissions = () => {
   };
 
   const handleDeleteRole = (role: any) => {
-    console.log(`Eliminando rol: ${role.name}`);
+    setRoleToDelete(role);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteRole = async () => {
+    if (!roleToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      // Simular llamada a API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Eliminar el rol de la lista local
+      setRoles(prevRoles => prevRoles.filter(role => role.id !== roleToDelete.id));
+      
+      toast.success(`Rol "${roleToDelete.name}" eliminado exitosamente`);
+      setShowDeleteConfirm(false);
+      setRoleToDelete(null);
+    } catch (error) {
+      toast.error('Error al eliminar el rol');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const onSubmit = (data: RoleFormValues) => {
-    console.log('Datos del formulario:', data);
+    if (selectedRole) {
+      // Actualizar rol existente
+      setRoles(prevRoles => 
+        prevRoles.map(role => 
+          role.id === selectedRole.id 
+            ? { ...role, ...data }
+            : role
+        )
+      );
+      toast.success(`Rol "${data.name}" actualizado exitosamente`);
+    } else {
+      // Crear nuevo rol
+      const newRole = {
+        id: Math.max(...roles.map(r => r.id)) + 1,
+        ...data
+      };
+      setRoles(prevRoles => [...prevRoles, newRole]);
+      toast.success(`Rol "${data.name}" creado exitosamente`);
+    }
+    
     setShowModal(false);
     setSelectedRole(null);
     reset();
@@ -164,6 +209,7 @@ const RolesAndPermissions = () => {
                           handleEditRole(role);
                         }}
                         className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                        title="Editar rol"
                       >
                         <Edit className="w-4 h-4 text-gray-600" />
                       </button>
@@ -173,6 +219,7 @@ const RolesAndPermissions = () => {
                           handleDeleteRole(role);
                         }}
                         className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                        title="Eliminar rol"
                       >
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </button>
@@ -284,6 +331,40 @@ const RolesAndPermissions = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de eliminación */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+            <div className="flex items-center space-x-4 mb-4">
+              <Trash2 className="w-6 h-6 text-red-600" />
+              <h2 className="text-xl font-bold text-gray-800">Confirmar Eliminación</h2>
+            </div>
+            <p className="text-gray-600 mb-4">
+              ¿Estás seguro que deseas eliminar el rol "{roleToDelete?.name}"? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setRoleToDelete(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                disabled={isDeleting}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteRole}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
           </div>
         </div>
       )}

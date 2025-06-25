@@ -35,6 +35,7 @@ export interface SiteManagementLayoutProps {
   page: number;
   onPageChange: (page: number) => void;
   totalPages: number;
+  onAddSite?: (data: any) => void;
 }
 
 export const SiteManagementLayout: React.FC<SiteManagementLayoutProps> = ({
@@ -60,6 +61,7 @@ export const SiteManagementLayout: React.FC<SiteManagementLayoutProps> = ({
   page,
   onPageChange,
   totalPages,
+  onAddSite,
 }) => {
   return (
     <div className="p-6">
@@ -76,6 +78,7 @@ export const SiteManagementLayout: React.FC<SiteManagementLayoutProps> = ({
           totalSites={totalSites}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={onRowsPerPageChange}
+          onAddSite={onAddSite || (() => {})}
         />
         <SiteTable
           columns={columns}

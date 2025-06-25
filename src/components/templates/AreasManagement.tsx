@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { LayoutGrid, Search, Plus, Edit, Trash2, X } from 'lucide-react';
 import { z } from 'zod';
+import { toast } from 'react-hot-toast';
 
 const AreasManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedArea, setSelectedArea] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [areaToDelete, setAreaToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -17,7 +21,7 @@ const AreasManagement = () => {
   const [formErrors, setFormErrors] = useState<any>({});
 
   // Datos de ejemplo para áreas
-  const areas = [
+  const [areas, setAreas] = useState([
     {
       id: 1,
       name: 'Área de Administración',
@@ -39,8 +43,19 @@ const AreasManagement = () => {
         capacity: 15,
         location: 'Piso 2'
       }
+    },
+    {
+      id: 3,
+      name: 'Área de Soporte',
+      description: 'Área para el equipo de soporte técnico',
+      status: 'Activo',
+      details: {
+        manager: 'Carlos López',
+        capacity: 12,
+        location: 'Piso 1'
+      }
     }
-  ];
+  ]);
 
   // Zod schema para la validación
   const areaSchema = z.object({
@@ -66,8 +81,29 @@ const AreasManagement = () => {
   };
 
   const handleDeleteArea = (area: any) => {
-    // Aquí iría la lógica para eliminar el área
-    console.log(`Eliminando área: ${area.name}`);
+    setAreaToDelete(area);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteArea = async () => {
+    if (!areaToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      // Simular llamada a API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Eliminar el área de la lista local
+      setAreas(prevAreas => prevAreas.filter(area => area.id !== areaToDelete.id));
+      
+      toast.success(`Área "${areaToDelete.name}" eliminada exitosamente`);
+      setShowDeleteConfirm(false);
+      setAreaToDelete(null);
+    } catch (error) {
+      toast.error('Error al eliminar el área');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const filteredAreas = areas.filter(area =>
@@ -80,9 +116,55 @@ const AreasManagement = () => {
 
     try {
       areaSchema.parse(formData); // Valida los datos con Zod
-      // Aquí iría la lógica para crear/actualizar el área
-      console.log("Datos válidos:", formData);
-      setShowModal(false); // Cerrar el modal después de la validación
+      
+      if (selectedArea) {
+        // Actualizar área existente
+        setAreas(prevAreas => 
+          prevAreas.map(area => 
+            area.id === selectedArea.id 
+              ? {
+                  ...area,
+                  name: formData.name,
+                  description: formData.description,
+                  status: formData.status,
+                  details: {
+                    manager: formData.manager,
+                    capacity: formData.capacity,
+                    location: formData.location
+                  }
+                }
+              : area
+          )
+        );
+        toast.success(`Área "${formData.name}" actualizada exitosamente`);
+      } else {
+        // Crear nueva área
+        const newArea = {
+          id: Math.max(...areas.map(a => a.id)) + 1,
+          name: formData.name,
+          description: formData.description,
+          status: formData.status,
+          details: {
+            manager: formData.manager,
+            capacity: formData.capacity,
+            location: formData.location
+          }
+        };
+        setAreas(prevAreas => [...prevAreas, newArea]);
+        toast.success(`Área "${formData.name}" creada exitosamente`);
+      }
+      
+      setShowModal(false);
+      setSelectedArea(null);
+      setFormData({
+        name: '',
+        description: '',
+        status: 'Activo',
+        capacity: 0,
+        manager: '',
+        location: ''
+      });
+      setFormErrors({});
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors: any = {};
@@ -104,7 +186,19 @@ const AreasManagement = () => {
               <h1 className="text-2xl font-bold text-[#5D0F1D]">Gestión de Áreas</h1>
               <button 
                 className="flex items-center space-x-2 bg-[#5D0F1D] text-white px-4 py-2 rounded-lg hover:bg-[#7A1E2E] transition-colors duration-200"
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setShowModal(true);
+                  setSelectedArea(null);
+                  setFormData({
+                    name: '',
+                    description: '',
+                    status: 'Activo',
+                    capacity: 0,
+                    manager: '',
+                    location: ''
+                  });
+                  setFormErrors({});
+                }}
               >
                 <Plus className="w-5 h-5" />
                 <span>Nueva Área</span>
@@ -163,12 +257,14 @@ const AreasManagement = () => {
                       <button
                         onClick={() => handleEditArea(area)}
                         className="text-[#5D0F1D] hover:text-[#7A1E2E]"
+                        title="Editar área"
                       >
                         <Edit className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleDeleteArea(area)}
                         className="text-red-600 hover:text-red-900"
+                        title="Eliminar área"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -184,7 +280,7 @@ const AreasManagement = () => {
       {/* Modal de Crear/Editar Área */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-2xl w-full">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-[#5D0F1D]">
                 {selectedArea ? 'Editar Área' : 'Nueva Área'}
@@ -193,6 +289,15 @@ const AreasManagement = () => {
                 onClick={() => {
                   setShowModal(false);
                   setSelectedArea(null);
+                  setFormData({
+                    name: '',
+                    description: '',
+                    status: 'Activo',
+                    capacity: 0,
+                    manager: '',
+                    location: ''
+                  });
+                  setFormErrors({});
                 }}
                 className="text-gray-500 hover:text-gray-700"
               >
@@ -206,7 +311,9 @@ const AreasManagement = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                  className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                    formErrors.name ? 'border-red-500' : ''
+                  }`}
                   placeholder="Ej: Área de Administración"
                 />
                 {formErrors.name && <span className="text-red-500 text-sm">{formErrors.name}</span>}
@@ -216,7 +323,9 @@ const AreasManagement = () => {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                  className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                    formErrors.description ? 'border-red-500' : ''
+                  }`}
                   rows={3}
                   placeholder="Describe el propósito y función del área"
                 />
@@ -228,11 +337,14 @@ const AreasManagement = () => {
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      formErrors.status ? 'border-red-500' : ''
+                    }`}
                   >
                     <option value="Activo">Activo</option>
                     <option value="Inactivo">Inactivo</option>
                   </select>
+                  {formErrors.status && <span className="text-red-500 text-sm">{formErrors.status}</span>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Capacidad</label>
@@ -240,7 +352,9 @@ const AreasManagement = () => {
                     type="number"
                     value={formData.capacity}
                     onChange={(e) => setFormData({ ...formData, capacity: +e.target.value })}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      formErrors.capacity ? 'border-red-500' : ''
+                    }`}
                     placeholder="Ej: 20"
                   />
                   {formErrors.capacity && <span className="text-red-500 text-sm">{formErrors.capacity}</span>}
@@ -253,7 +367,9 @@ const AreasManagement = () => {
                     type="text"
                     value={formData.manager}
                     onChange={(e) => setFormData({ ...formData, manager: e.target.value })}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      formErrors.manager ? 'border-red-500' : ''
+                    }`}
                     placeholder="Ej: Juan Pérez"
                   />
                   {formErrors.manager && <span className="text-red-500 text-sm">{formErrors.manager}</span>}
@@ -264,7 +380,9 @@ const AreasManagement = () => {
                     type="text"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D]"
+                    className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#5D0F1D] ${
+                      formErrors.location ? 'border-red-500' : ''
+                    }`}
                     placeholder="Ej: Piso 1"
                   />
                   {formErrors.location && <span className="text-red-500 text-sm">{formErrors.location}</span>}
@@ -276,6 +394,15 @@ const AreasManagement = () => {
                   onClick={() => {
                     setShowModal(false);
                     setSelectedArea(null);
+                    setFormData({
+                      name: '',
+                      description: '',
+                      status: 'Activo',
+                      capacity: 0,
+                      manager: '',
+                      location: ''
+                    });
+                    setFormErrors({});
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
@@ -289,6 +416,40 @@ const AreasManagement = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de eliminación */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+            <div className="flex items-center space-x-4 mb-4">
+              <Trash2 className="w-6 h-6 text-red-600" />
+              <h2 className="text-xl font-bold text-gray-800">Confirmar Eliminación</h2>
+            </div>
+            <p className="text-gray-600 mb-4">
+              ¿Estás seguro que deseas eliminar el área "{areaToDelete?.name}"? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setAreaToDelete(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                disabled={isDeleting}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteArea}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
           </div>
         </div>
       )}
