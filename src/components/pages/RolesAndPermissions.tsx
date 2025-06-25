@@ -57,6 +57,17 @@ const RolesAndPermissions = () => {
         'Solicitar productos',
         'Ver reportes básicos'
       ]
+    },
+    {
+      id: 4,
+      name: 'Instructor',
+      description: 'Acceso a gestión de inventario y reportes para instructores',
+      permissions: [
+        'Ver inventario',
+        'Solicitar productos',
+        'Ver reportes',
+        'Gestionar entradas/salidas'
+      ]
     }
   ]);
 

@@ -4,7 +4,7 @@ export interface User {
   apellido: string;
   email: string;
   telefono: string;
-  rol: 'administrador' | 'supervisor' | 'operador' | 'invitado';
+  rol: 'administrador' | 'supervisor' | 'operador' | 'invitado' | 'instructor';
   centro: string;
   sede: string;
   estado: 'activo' | 'inactivo';
@@ -18,7 +18,7 @@ export interface UserFormData {
   email: string;
   telefono: string;
   password: string;
-  rol: 'administrador' | 'supervisor' | 'operador' | 'invitado';
+  rol: 'administrador' | 'supervisor' | 'operador' | 'invitado' | 'instructor';
   centro: string;
   sede: string;
 }
@@ -26,7 +26,7 @@ export interface UserFormData {
 export interface LoginCredentials {
   email: string;
   password: string;
-  rol: 'administrador' | 'supervisor' | 'operador' | 'invitado';
+  rol: 'administrador' | 'supervisor' | 'operador' | 'invitado' | 'instructor';
 }
 
 export interface AuthUser {

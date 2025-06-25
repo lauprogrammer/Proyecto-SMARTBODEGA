@@ -10,7 +10,7 @@ import { LoginCredentials } from '@/types/user';
 const loginSchema = z.object({
   email: z.string().email('Email inválido').min(1, 'El email es obligatorio'),
   password: z.string().min(1, 'La contraseña es obligatoria').min(6, 'La contraseña debe tener al menos 6 caracteres'),
-  rol: z.enum(['administrador', 'supervisor', 'operador', 'invitado'], {
+  rol: z.enum(['administrador', 'supervisor', 'operador', 'invitado', 'instructor'], {
     required_error: 'El rol es obligatorio',
     invalid_type_error: 'Rol inválido'
   })
@@ -104,6 +104,7 @@ const Login = () => {
               <option value="supervisor">Supervisor</option>
               <option value="operador">Operador</option>
               <option value="invitado">Invitado</option>
+              <option value="instructor">Instructor</option>
             </select>
             {errors.rol && <p className="text-red-500 text-sm">{errors.rol.message}</p>}
           </div>
@@ -130,6 +131,7 @@ const Login = () => {
             <p><strong>Supervisor:</strong> maria.garcia@sena.edu.co / 123456</p>
             <p><strong>Operador:</strong> carlos.lopez@sena.edu.co / 123456</p>
             <p><strong>Invitado:</strong> ana.rodriguez@sena.edu.co / 123456</p>
+            <p><strong>Instructor:</strong> pedro.martinez@sena.edu.co / 123456</p>
           </div>
         </div>
       </div>

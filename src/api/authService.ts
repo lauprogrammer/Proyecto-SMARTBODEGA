@@ -53,6 +53,19 @@ const mockUsers: User[] = [
     estado: 'activo',
     fechaCreacion: '2024-01-25',
     ultimoAcceso: '2024-04-16T14:20:00'
+  },
+  {
+    id: 5,
+    nombre: 'Pedro',
+    apellido: 'Martínez',
+    email: 'pedro.martinez@sena.edu.co',
+    telefono: '3005678901',
+    rol: 'instructor',
+    centro: 'Centro de Tecnologías Agroindustriales',
+    sede: 'Sede Principal',
+    estado: 'activo',
+    fechaCreacion: '2024-04-20',
+    ultimoAcceso: '2024-04-20T08:00:00'
   }
 ];
 

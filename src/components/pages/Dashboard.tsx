@@ -32,20 +32,20 @@ const Dashboard = () => {
         </div>
       </section>
 
-      {/* Sección Visión y Misión */}
+      {/* Sección de Proposito*/}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center text-center">
           <img src="/src/img/logo SENA.png" alt="Visión" className="h-20 w-20 mb-4 rounded-full bg-white shadow" />
-          <h3 className="text-xl font-bold text-[#5D0F1D] mb-2">Visión</h3>
+          <h3 className="text-xl font-bold text-[#5D0F1D] mb-2">Propósito</h3>
           <p className="text-gray-700 text-lg">
-            Ser la plataforma líder en gestión de inventarios, reconocida por su innovación, facilidad de uso y aporte al crecimiento de las organizaciones y centros educativos.
+            Este proyecto tiene como propósito mejorar la gestión de inventarios en pequeñas empresas mediante una herramienta digital accesible y fácil de usar.
           </p>
         </div>
         <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center text-center">
           <img src="/src/img/Dash.jpg" alt="Misión" className="h-20 w-20 mb-4 rounded-xl object-cover shadow" />
-          <h3 className="text-xl font-bold text-[#5D0F1D] mb-2">Misión</h3>
+          <h3 className="text-xl font-bold text-[#5D0F1D] mb-2">enfoque</h3>
           <p className="text-gray-700 text-lg">
-            Brindar una solución integral y moderna para la gestión de inventarios, facilitando el control, la transparencia y la toma de decisiones inteligentes en cualquier organización.
+            Este proyecto adopta un enfoque tecnológico y centrado en el usuario, buscando resolver necesidades reales mediante soluciones prácticas, escalables y sostenibles.
           </p>
         </div>
       </section>
