@@ -210,88 +210,90 @@ const Sidebar = ({ isOpen, toggleSidebar }: { isOpen: boolean; toggleSidebar: ()
           )}
         </div>
 
-        {/* Menús */}
-        {menuItems.map((menu) => (
-          <div key={menu.title} className="space-y-1">
-            <button
-              onClick={() => {
-                if (menu.path) {
-                  handleNavigation(menu.path);
-                } else {
-                  toggleMenu(menu.title);
-                }
-              }}
-              className={`w-full text-left flex justify-between items-center px-4 py-2.5 rounded-lg transition-colors duration-200
-                ${menu.path && location.pathname === menu.path
-                  ? "bg-[#CAB58A] text-black"
-                  : "bg-[#7A1E2E] hover:bg-[#8B2438] text-white"}
-              `}
-            >
-              <div className="flex items-center space-x-2">
-                {menu.icon}
-                <span className="font-medium">{menu.title}</span>
-              </div>
-              {menu.submenu.length > 0 && (
-                openMenus[menu.title] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-              )}
-            </button>
-
-            {/* Submenús */}
-            <div
-              className={`ml-4 overflow-hidden transition-all duration-300 ease-in-out ${
-                openMenus[menu.title] ? 'max-h-[1000px] opacity-100 pointer-events-auto' : 'max-h-0 opacity-0 pointer-events-none'
-              } space-y-1`}
-            >
-              {menu.submenu.length > 0 && menu.submenu.map((submenu) => (
-                <div key={submenu.title}>
-                  <button
-                    onClick={() => {
-                      if (submenu.subItems) {
-                        toggleMenu(submenu.title);
-                      } else if (submenu.path) {
-                        handleNavigation(submenu.path);
-                      }
-                    }}
-                    className={`w-full flex items-center justify-between space-x-2 px-4 py-2 rounded-lg transition-colors duration-200
-                      ${submenu.path && location.pathname === submenu.path
-                        ? "bg-[#CAB58A] text-black"
-                        : "text-gray-200 hover:text-white hover:bg-[#7A1E2E]"}
-                    `}
-                  >
-                    <div className="flex items-center space-x-2">
-                      {submenu.icon}
-                      <span>{submenu.title}</span>
-                    </div>
-                    {submenu.subItems && (
-                      openMenus[submenu.title] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                    )}
-                  </button>
-                  {/* Sub-submenús */}
-                  <div
-                    className={`ml-4 overflow-hidden transition-all duration-300 ease-in-out ${
-                      submenu.subItems && openMenus[submenu.title] ? 'max-h-[1000px] opacity-100 pointer-events-auto' : 'max-h-0 opacity-0 pointer-events-none'
-                    } space-y-1`}
-                  >
-                    {submenu.subItems && submenu.subItems.map((subsubmenu) => (
-                      <button
-                        key={subsubmenu.title}
-                        onClick={() => subsubmenu.path && handleNavigation(subsubmenu.path)}
-                        className={`w-full flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200
-                          ${subsubmenu.path && location.pathname === subsubmenu.path
-                            ? "bg-[#CAB58A] text-black"
-                            : "text-gray-200 hover:text-white hover:bg-[#7A1E2E]"}
-                        `}
-                      >
-                        {subsubmenu.icon}
-                        <span>{subsubmenu.title}</span>
-                      </button>
-                    ))}
-                  </div>
+        {/* Menús con scroll */}
+        <div className="flex-1 overflow-y-scroll scrollbar scrollbar-thumb-[#CAB58A] scrollbar-track-[#5D0F1D] max-h-[calc(100vh-300px)] pr-2" style={{ scrollbarWidth: 'auto' }}>
+          {menuItems.map((menu) => (
+            <div key={menu.title} className="space-y-1">
+              <button
+                onClick={() => {
+                  if (menu.path) {
+                    handleNavigation(menu.path);
+                  } else {
+                    toggleMenu(menu.title);
+                  }
+                }}
+                className={`w-full text-left flex justify-between items-center px-4 py-2.5 rounded-lg transition-colors duration-200
+                  ${menu.path && location.pathname === menu.path
+                    ? "bg-[#CAB58A] text-black"
+                    : "bg-[#7A1E2E] hover:bg-[#8B2438] text-white"}
+                `}
+              >
+                <div className="flex items-center space-x-2">
+                  {menu.icon}
+                  <span className="font-medium">{menu.title}</span>
                 </div>
-              ))}
+                {menu.submenu.length > 0 && (
+                  openMenus[menu.title] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                )}
+              </button>
+
+              {/* Submenús */}
+              <div
+                className={`ml-4 overflow-hidden transition-all duration-300 ease-in-out ${
+                  openMenus[menu.title] ? 'max-h-[1000px] opacity-100 pointer-events-auto' : 'max-h-0 opacity-0 pointer-events-none'
+                } space-y-1`}
+              >
+                {menu.submenu.length > 0 && menu.submenu.map((submenu) => (
+                  <div key={submenu.title}>
+                    <button
+                      onClick={() => {
+                        if (submenu.subItems) {
+                          toggleMenu(submenu.title);
+                        } else if (submenu.path) {
+                          handleNavigation(submenu.path);
+                        }
+                      }}
+                      className={`w-full flex items-center justify-between space-x-2 px-4 py-2 rounded-lg transition-colors duration-200
+                        ${submenu.path && location.pathname === submenu.path
+                          ? "bg-[#CAB58A] text-black"
+                          : "text-gray-200 hover:text-white hover:bg-[#7A1E2E]"}
+                      `}
+                    >
+                      <div className="flex items-center space-x-2">
+                        {submenu.icon}
+                        <span>{submenu.title}</span>
+                      </div>
+                      {submenu.subItems && (
+                        openMenus[submenu.title] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+                    {/* Sub-submenús */}
+                    <div
+                      className={`ml-4 overflow-hidden transition-all duration-300 ease-in-out ${
+                        submenu.subItems && openMenus[submenu.title] ? 'max-h-[1000px] opacity-100 pointer-events-auto' : 'max-h-0 opacity-0 pointer-events-none'
+                      } space-y-1`}
+                    >
+                      {submenu.subItems && submenu.subItems.map((subsubmenu) => (
+                        <button
+                          key={subsubmenu.title}
+                          onClick={() => subsubmenu.path && handleNavigation(subsubmenu.path)}
+                          className={`w-full flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-200
+                            ${subsubmenu.path && location.pathname === subsubmenu.path
+                              ? "bg-[#CAB58A] text-black"
+                              : "text-gray-200 hover:text-white hover:bg-[#7A1E2E]"}
+                          `}
+                        >
+                          {subsubmenu.icon}
+                          <span>{subsubmenu.title}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         {/* Botón de cerrar sesión */}
         <div className="absolute bottom-4 left-4 right-4">
